@@ -3,7 +3,7 @@
 <style type="text/css">
     .header {
         display: flex;
-        height: 50px;
+        height: 40px;
     }
 
     .footer{
@@ -49,7 +49,7 @@
                 </transition>
                 <transition name="fade">
                     <li class="pure-menu-item">
-                        <a class="pure-menu-link" v-if="finished">这是最后一章</a>
+                        <a href="/" class="pure-menu-link" v-if="finished">这是最后一章</a>
                     </li>
                 </transition>
             </ul>
@@ -82,7 +82,7 @@
         </transition>
 
         <transition name="fade" class="footer">
-            <span class="pure-button" style="width: 100%" v-if="finished">这是最后一章</span>\
+            <a href="/" class="pure-button" style="width: 100%" v-if="finished">这是最后一章</a>\
         </transition>
 
     </div>

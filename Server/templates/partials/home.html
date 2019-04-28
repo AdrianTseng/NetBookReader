@@ -7,12 +7,12 @@
 
     .button-delete {
         color: red;
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
     .button-add {
         color: limegreen;
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
 
     .book-enter-active, .book-leave-active {
@@ -57,8 +57,8 @@
                             </div>
                             <div class="pure-u-1-5">
                                 <transition name="fade">
-                                    <button class="prue-button button-delete" v-on:click="remove(book.book)" v-if="book.show">
-                                        <span>-</span></button>
+                                    <a class="button-delete" v-on:click="remove(book.book)" v-if="book.show">
+                                        <span>-</span></a>
                                 </transition>
                             </div>
                         </div>
@@ -81,8 +81,8 @@
                             </div>
                             <div class="pure-u-1-5">
                                 <transition name="fade">
-                                <button class="prue-button button-add" v-on:click="add(book.book)" v-if="book.show">
-                                    <span>+</span></button>
+                                <a class="button-add" v-on:click="add(book.book)" v-if="book.show">
+                                    <span>+</span></a>
                                 </transition>
                             </div>
                         </div>
