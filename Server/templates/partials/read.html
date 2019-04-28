@@ -54,13 +54,13 @@
                 </transition>
             </ul>
         </div>
-        <div class="body">
+        <div class="body" id="content-body">
             <transition name="fade">
             <div id="waiting" v-if="!ready">
                 <p>等待刷新...</p>
             </div>
 
-        </transition>
+            </transition>
             <transition name="fade">
             <div class="pure-g" v-if="ready">
                 <div class="pure-u-1-1">
@@ -96,7 +96,7 @@ Vue.http.headers.common["X-CSRFToken"] = "{{ csrf_token() }}";
 
 
 parse_content = function(content_str){
-    return content_str.split("\n\n")
+    return content_str.split("\n\n");
 };
 
 var app = new Vue({
@@ -117,7 +117,7 @@ var app = new Vue({
                         this.finished = true;
                         this.next_chapter = null;
                     }else{
-                        this.next_chapter = res.body.book;
+                        this.next_chapter = res.body;
                     }
                 },function (res) {
                     console.log(res);
@@ -129,8 +129,11 @@ var app = new Vue({
                 this.chapter_id = this.next_chapter.id;
                 this.title = this.next_chapter.title;
                 this.contents = parse_content(this.next_chapter.content);
-                scroll(0, 0);
                 this.next_chapter = null;
+
+                window.scrollTo(0, 0);
+                this.$el.querySelector("#content-body").scrollTo(0, 0);
+
                 this.get_next_chapter();
             }
         }
