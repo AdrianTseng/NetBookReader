@@ -1,6 +1,6 @@
 __author__ = 'LimeQM'
 
-from flask import render_template, redirect, url_for, flash, request, abort, jsonify
+from flask import render_template, redirect, flash, request, abort, jsonify
 from jinja2 import TemplateNotFound
 from . import app, login_manager, db
 from .models import User, Chapters, Reading
@@ -47,7 +47,7 @@ def user():
             if request.args.get('next'):
                 return redirect(request.args.get('next'))
             else:
-                return redirect(url_for("home"))
+                return redirect("/home")
         flash("用户名或者密码错误")
     return render_template("/partials/user.html", dev="vue/dist/vue.js" if app.debug else "vue", form=form)
 
@@ -145,8 +145,3 @@ def partials(content):
         return render_template("/partials/%s.html" % content, module=content)
     except TemplateNotFound:
         abort(404)
-
-
-@app.route('/static/<path:statics>')
-def statics(statics):
-    return url_for('static', statics)
