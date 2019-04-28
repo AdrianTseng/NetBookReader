@@ -15,16 +15,11 @@ def load_user(user_id):
     return User.get(user_id)
 
 
-@app.route('/')
-def index():
-    return redirect('/home')
-
-
 def extract_book_name(book_str):
     return book_str.split("_")[0]
 
 
-@app.route('/home')
+@app.route('/')
 @login_required
 def home():
     user = current_user
@@ -47,7 +42,7 @@ def user():
             if request.args.get('next'):
                 return redirect(request.args.get('next'))
             else:
-                return redirect("/home")
+                return redirect("/")
         flash("用户名或者密码错误")
     return render_template("/partials/user.html", dev="vue/dist/vue.js" if app.debug else "vue", form=form)
 
