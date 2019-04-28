@@ -1,0 +1,107 @@
+{% extends "layout.html" %}
+{% block content %}
+<style type="text/css">
+    .header {
+        display: flex;
+        height: 50px;
+    }
+
+    .body {
+        display: flex;
+        height: calc(100vh - 50px);
+
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .menu-enter-active, .menu-leave-active {
+        transition: all 1s;
+    }
+
+    .menu-enter, .menu-leave-to
+        /* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+</style>
+
+
+    <div id="menu">
+        <div class="header pure-menu pure-menu-horizontal">
+            <a href="/home" class="pure-menu-heading pure-menu-link">{{ book }}</a>
+            <ul class="pure-menu-list">
+                <form class="pure-form">
+                    <fieldset>
+                        <input type="text" v-model="search" placeholder="检索章节">
+                    </fieldset>
+                </form>
+            </ul>
+        </div>
+        <div class="body">
+            <div class="pure-menu menu-block">
+                <transition-group name="menu" tag="ul" class="pure-menu-list">
+                    <li class="pure-menu-item" v-for="menu in filtered" v-bind:key="menu.menu">
+                        <a class="pure-menu-link" v-on:click="select(menu.id)">!{ menu.menu }</a>
+                    </li>
+                </transition-group>
+            </div>
+        </div>
+    </div>
+
+<script>
+
+//import VueResource from 'vue-resource'
+
+Vue.use(VueResource);
+Vue.http.headers.common["X-CSRFToken"] = "{{ csrf_token() }}";
+
+
+parse_content = function(content_str){
+    return content_str.split("\n\n")
+};
+
+var app = new Vue({
+    el: "#menu",
+    data: {
+        chapters: null,
+        search: "",
+    },
+    methods: {
+        select: function (id) {
+            this.$http.post("/menu/{{ book }}", {id: id}, {emulateJSON: true}).then(
+                function (res) {
+                    window.location.href = "/read/{{ book }}"
+                },function (res) {
+                    console.log(res);
+                }
+            );
+        },
+    },
+    computed: {
+        filtered: function () {
+            console.log(this.search)
+            if(this.search === ""){
+                return this.chapters
+            }else{
+                return this.chapters.filter(each => each.menu.includes(this.search));
+            }
+        },
+    },
+    created: function(){
+        this.chapters = function () {
+            let ori = ["{{ menus|join("\", \""|safe) }}"];
+            return ori.map(value => function (v) {
+               let vs = v.split("_");
+               return {
+                   menu: vs[0],
+                   id: vs[1]
+               }
+            }(value));
+        }();
+    },
+    delimiters: ['!{','}']
+});
+</script>
+{% endblock %}

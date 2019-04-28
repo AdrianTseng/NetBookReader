@@ -1,0 +1,59 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<style type="text/css">
+    form h2 {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    #user {
+        display: table;
+        height: 100%;
+        width: 100%;
+    }
+
+    .pure-control-group {
+        margin: 3px auto;
+    }
+
+    #login {
+        display: table-cell;
+        vertical-align: middle;
+    }
+</style>
+<div class="pure-g" id="user" style="margin: 20pt">
+<div class="pure-u-md-1-3 pure-u-sm-1-1"></div>
+<div class="pure-u-md-1-3 pure-u-sm-1-1" id="login">
+    <form action="{{ url_for("user") }}" method="post" name="login" class="pure-form pure-form-aligned">
+    <h2>小明追书</h2>
+        <fieldset>
+            <div class="pure-control-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请填写用户名" name="username" required>
+            </div>
+
+            <div class="pure-control-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请填写密码" name="password" required>
+            </div>
+
+
+            <div class="pure-controls">
+                {{ form.csrf_token }}
+                <button type="submit" class="pure-button pure-button-primary">登陆</button>
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <span class="pure-form-message">{{ message }}</span>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+
+        </fieldset>
+    </form>
+</div>
+<div class="pure-u-md-1-3 pure-u-sm-1-1"></div>
+</div>
+{% endblock %}

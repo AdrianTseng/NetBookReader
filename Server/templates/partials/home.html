@@ -1,0 +1,170 @@
+{% extends "layout.html" %}
+{% block content %}
+    <style type="text/css">
+    .book-list {
+    }
+
+    .book-enter-active, .book-leave-active {
+        transition: all 1s;
+    }
+
+    .book-enter, .book-leave-to
+        /* .list-leave-active for below version 2.1.8 */ {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity .5s;
+    }
+    .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+      opacity: 0;
+    }
+</style>
+
+
+    <div id="home" style="margin: 20pt;">
+        <div class="pure-g">
+            <div class="pure-u-1-1">
+                <h1>你好，{{ user }}</h1>
+            </div>
+
+            <div class="pure-u-lg-1-4 pure-u-1-1"></div>
+            <div class="pure-u-lg-1-4 pure-u-1-1">
+                <transition name="fade">
+                    <div class="book-section" v-if="books_empty">
+                    <h3>追读列表</h3>
+                </div>
+                </transition>
+
+                <transition-group name="book" tag="div" class="book-menu">
+                    <div class="book-list" v-for="book in books" v-bind:key="book.book">
+                        <div class="pure-g" class="book">
+                            <div class="pure-u-4-5" v-on:click="read(book.book)">
+                                <h4 class="book-title">!{ book.book }</h4>
+                                <h5 class="book-chapter">!{ book.chapter }</h5>
+                            </div>
+                            <div class="pure-u-1-5">
+                                <transition name="fade">
+                                    <button class="prue-button pure-button-error" v-on:click="remove(book.book)" v-if="book.show">-</button>
+                                </transition>
+                            </div>
+                        </div>
+                    </div>
+                </transition-group>
+            </div>
+
+            <div class="pure-u-lg-1-4 pure-u-1-1">
+                <transition name="fade">
+                    <div class="book-section" v-if="pending_empty">
+                        <h3>库存小说</h3>
+                    </div>
+                </transition>
+                <transition-group name="book" tag="div" class="book-menu">
+                    <div class="book-lists" v-for="book in pending" v-bind:key="book.book">
+                        <div class="pure-g" class="book">
+                            <div class="pure-u-4-5">
+                                <h4 class="book-title">!{ book.book }</h4>
+                                <h5 class="book-chapter">!{ book.chapter }</h5>
+                            </div>
+                            <div class="pure-u-1-5">
+                                <transition name="fade">
+                                <button class="prue-button pure-button-secondary" v-on:click="add(book.book)" v-if="book.show">+</button>
+                                </transition>
+                            </div>
+                        </div>
+                    </div>
+                </transition-group>
+            </div>
+
+            <div class="pure-u-lg-1-4 pure-u-1-1"></div>
+        </div>
+
+    </div>
+
+<script>
+
+//import VueResource from 'vue-resource'
+
+Vue.use(VueResource);
+Vue.http.headers.common["X-CSRFToken"] = "{{ csrf_token() }}";
+
+function init_book(value) {
+    let sub_strs = value.split("_");
+    if(sub_strs.length === 3)
+        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], show: true};
+    else
+        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], page: sub_strs[3], show: true};
+}
+
+function set_invisible(elem, book_name) {
+    if(elem.book === book_name){
+        elem.show = false
+    }
+    return elem;
+}
+
+var app = new Vue({
+    el: "#home",
+    data: {
+{% if books|length > 0 %}
+        books: function () {
+            const ori = ["{{ books|join("\", \""|safe) }}"];
+            return ori.map(init_book)
+        }(),
+{% else %}
+        books: [],
+{% endif %}
+{% if pending|length > 0 %}
+        pending: function () {
+            const ori = ["{{ pending|join("\", \""|safe) }}"];
+            return ori.map(init_book)
+        }(),
+{% else %}
+        pending: [],
+{% endif %}
+    },
+
+    methods: {
+        add: function (book_name) {
+            this.pending = this.pending.map(book => set_invisible(book, book_name));
+            this.$http.post('/book/add', {book: book_name}, {emulateJSON: true}).then(
+                function(res){
+                    this.pending = this.pending.filter(each => each.book !== book_name);
+                    this.books.push(init_book(res.body.book));
+                },
+                function (res){
+                    console.log(res);
+                    window.location.reload();
+                });
+        },
+
+        remove: function (book_name) {
+            this.books = this.books.map(book => set_invisible(book, book_name));
+            this.$http.post('/book/remove', {book: book_name}, {emulateJSON: true}).then(
+                function (res) {
+                    this.books = this.books.filter(each => each.book !== book_name);
+                    this.pending.push(init_book(res.body.book));
+                },
+                function (res) {
+                    console.log(res);
+                    window.location.reload();
+                }
+            );
+        },
+        read: function (book_page) {
+            window.location.href = "/read/" + book_page;
+        }
+    },
+    computed: {
+        pending_empty: function () {
+            return this.pending.length > 0;
+        },
+        books_empty: function () {
+            return this.books.length > 0;
+        }
+    },
+    delimiters: ['!{','}']
+});
+</script>
+{% endblock %}

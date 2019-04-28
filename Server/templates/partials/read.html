@@ -1,0 +1,144 @@
+{% extends "layout.html" %}
+{% block content %}
+<style type="text/css">
+    .header {
+        display: flex;
+        height: 50px;
+    }
+
+    .footer{
+        display: flex;
+        height: 40px;
+    }
+
+    .body {
+        display: flex;
+        height: calc(100vh - 40px);
+
+        flex-direction: row;
+        flex-wrap: wrap;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .fade-enter-active, .fade-leave-active {
+      transition: opacity .5s;
+    }
+    .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
+      opacity: 0;
+    }
+</style>
+
+
+    <div id="read" style="margin: 20pt">
+        <div class="header pure-menu pure-menu-horizontal">
+            <a href="/home" class="pure-menu-heading pure-menu-link">主页</a>
+            <ul class="pure-menu-list">
+                <li class="pure-menu-item">
+                    <a href="/menu/{{ book }}" class="pure-menu-link">目录</a>
+                </li>
+                <transition name="fade">
+                    <li class="pure-menu-item">
+                        <a class="pure-menu-link" v-if="next_ready" v-on:click="next()">下一章</a>
+                    </li>
+                </transition>
+            </ul>
+        </div>
+        <div class="body">
+            <transition name="fade">
+            <div id="waiting" v-if="!ready">
+                <p>等待刷新...</p>
+            </div>
+
+        </transition>
+            <transition name="fade">
+            <div class="pure-g" v-if="ready">
+                <div class="pure-u-1-1">
+                    <h1>!{ title }</h1>
+                </div>
+
+                <div class="pure-u-1-1">
+                    <div v-for="content in contents">
+                        <p style="margin: 2px 2px 22px 2px">!{ content }</p>
+                    </div>
+                </div>
+            </div>
+            </transition>
+
+        </div>
+
+        <transition name="fade" class="footer">
+            <button class="pure-button" style="width: 100%" v-if="next_ready" v-on:click="next()">下一章</button>\
+        </transition>
+
+
+    </div>
+
+<script>
+
+//import VueResource from 'vue-resource'
+
+Vue.use(VueResource);
+Vue.http.headers.common["X-CSRFToken"] = "{{ csrf_token() }}";
+
+
+parse_content = function(content_str){
+    return content_str.split("\n\n")
+};
+
+var app = new Vue({
+    el: "#read",
+    data: {
+        ready: false,
+        chapter_id: "",
+        title: null,
+        contents: [],
+        next_chapter: null
+    },
+    methods: {
+        get_next_chapter: function () {
+            this.$http.get("/next/" + this.chapter_id).then(
+                function (res) {
+                    this.next_chapter = res.body;
+                },function (res) {
+                    console.log(res);
+                }
+            )
+        },
+        next: function () {
+            if(this.next_chapter !== null) {
+                this.chapter_id = this.next_chapter.id;
+                this.title = this.next_chapter.title;
+                this.contents = parse_content(this.next_chapter.content);
+                scroll(0, 0);
+                this.next_chapter = null;
+                this.get_next_chapter();
+            }
+        }
+    },
+    computed: {
+        next_ready: function () {
+            return this.next_chapter !== null;
+        }
+    },
+    created: function(){
+        this.chapter_id = function () {
+            return "{{ chapter_id }}"
+        }();
+        this.$http.get("/current/" + this.chapter_id).then(
+            function (res) {
+                this.title = res.body.title;
+                this.contents = parse_content(res.body.content);
+                this.chapter_id = res.body.id;
+                this.ready = true;
+                this.get_next_chapter();
+            },function (res) {
+                console.log(res);
+                window.location.href = "/home";
+            }
+        )
+    },
+    delimiters: ['!{','}']
+});
+</script>
+{% endblock %}

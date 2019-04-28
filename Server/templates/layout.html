@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head lang="zh">
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+
+    <title>小明追书</title>
+    <!--<meta name="description" content=""/>
+    <meta name="keywords" content=""/>-->
+
+    <meta name="format-detection" content="telephone=no, email=no"/>
+    <meta name="renderer" content="webkit">
+    <!-- uc强制竖屏 -->
+    <meta name="screen-orientation" content="portrait">
+    <!-- QQ强制竖屏 -->
+    <meta name="x5-orientation" content="portrait">
+    <!-- UC强制全屏 -->
+    <meta name="full-screen" content="yes">
+    <!-- QQ强制全屏 -->
+    <meta name="x5-fullscreen" content="true">
+    <!-- UC应用模式 -->
+    <meta name="browsermode" content="application">
+    <!-- QQ应用模式 -->
+    <meta name="x5-page-mode" content="app">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <base href="/">
+
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/grids-responsive-min.css"/>
+</head>
+<body>
+<style type="text/css">
+    body {
+        max-width: 768px;
+        margin: auto;
+    }
+</style>
+<script src="https://unpkg.com/vue-resource@1.5.1/dist/vue-resource.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/{{ dev }}"></script>
+    {% block content %} {% endblock %}
+
+<style type="text/css">
+    p {
+        font-size: 1.1em;
+        @import url('https://fonts.googleapis.com/css?family=Noto+Sans+SC');
+        font-family: 'Noto Sans SC', sans-serif;
+    }
+</style>
+</body>
+</html>
