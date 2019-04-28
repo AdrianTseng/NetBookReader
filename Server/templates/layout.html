@@ -37,18 +37,17 @@
     body {
         max-width: 768px;
         margin: auto;
+
+        background-color: #eee;
+        text-shadow: 0 0 1px transparent;
+
+        font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 </style>
 <script src="https://unpkg.com/vue-resource@1.5.1/dist/vue-resource.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/{{ dev }}"></script>
     {% block content %} {% endblock %}
 
-<style type="text/css">
-    p {
-        font-size: 1.1em;
-        @import url('https://fonts.googleapis.com/css?family=Noto+Sans+SC');
-        font-family: 'Noto Sans SC', sans-serif;
-    }
-</style>
+<link href="https://fonts.googleapis.com/css?family=Noto+Sans+SC&amp;subset=chinese-simplified" rel="stylesheet">
 </body>
 </html>

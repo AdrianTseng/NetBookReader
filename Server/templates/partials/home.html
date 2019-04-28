@@ -1,7 +1,18 @@
 {% extends "layout.html" %}
 {% block content %}
     <style type="text/css">
-    .book-list {
+    .book-entity {
+        background: white;
+    }
+
+    .button-delete {
+        color: red;
+        font-size: 2rem;
+    }
+
+    .button-add {
+        color: limegreen;
+        font-size: 2rem;
     }
 
     .book-enter-active, .book-leave-active {
@@ -24,13 +35,13 @@
 
 
     <div id="home" style="margin: 20pt;">
-        <div class="pure-g">
+        <div class="pure-g" style="padding: 10px">
             <div class="pure-u-1-1">
                 <h1>你好，{{ user }}</h1>
             </div>
 
-            <div class="pure-u-lg-1-4 pure-u-1-1"></div>
-            <div class="pure-u-lg-1-4 pure-u-1-1">
+            <div class="pure-u-md-1-4 pure-u-1-1"></div>
+            <div class="pure-u-md-1-4 pure-u-1-1" style="margin: 2rem">
                 <transition name="fade">
                     <div class="book-section" v-if="books_empty">
                     <h3>追读列表</h3>
@@ -40,13 +51,14 @@
                 <transition-group name="book" tag="div" class="book-menu">
                     <div class="book-list" v-for="book in books" v-bind:key="book.book">
                         <div class="pure-g" class="book">
-                            <div class="pure-u-4-5" v-on:click="read(book.book)">
+                            <div class="pure-u-4-5" class="book-entity" v-on:click="read(book.book)">
                                 <h4 class="book-title">!{ book.book }</h4>
                                 <h5 class="book-chapter">!{ book.chapter }</h5>
                             </div>
                             <div class="pure-u-1-5">
                                 <transition name="fade">
-                                    <button class="prue-button pure-button-error" v-on:click="remove(book.book)" v-if="book.show">-</button>
+                                    <button class="prue-button button-delete" v-on:click="remove(book.book)" v-if="book.show">
+                                        <span>-</span></button>
                                 </transition>
                             </div>
                         </div>
@@ -54,7 +66,7 @@
                 </transition-group>
             </div>
 
-            <div class="pure-u-lg-1-4 pure-u-1-1">
+            <div class="pure-u-md-1-4 pure-u-1-1" style="margin: 2rem">
                 <transition name="fade">
                     <div class="book-section" v-if="pending_empty">
                         <h3>库存小说</h3>
@@ -63,13 +75,14 @@
                 <transition-group name="book" tag="div" class="book-menu">
                     <div class="book-lists" v-for="book in pending" v-bind:key="book.book">
                         <div class="pure-g" class="book">
-                            <div class="pure-u-4-5">
+                            <div class="pure-u-4-5" class="book-entity">
                                 <h4 class="book-title">!{ book.book }</h4>
                                 <h5 class="book-chapter">!{ book.chapter }</h5>
                             </div>
                             <div class="pure-u-1-5">
                                 <transition name="fade">
-                                <button class="prue-button pure-button-secondary" v-on:click="add(book.book)" v-if="book.show">+</button>
+                                <button class="prue-button button-add" v-on:click="add(book.book)" v-if="book.show">
+                                    <span>+</span></button>
                                 </transition>
                             </div>
                         </div>
@@ -77,7 +90,7 @@
                 </transition-group>
             </div>
 
-            <div class="pure-u-lg-1-4 pure-u-1-1"></div>
+            <div class="pure-u-md-1-4 pure-u-1-1"></div>
         </div>
 
     </div>

@@ -21,6 +21,11 @@
         -webkit-overflow-scrolling: touch;
     }
 
+    p {
+        font-size: 1.1em;
+        font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+
     .fade-enter-active, .fade-leave-active {
       transition: opacity .5s;
     }
@@ -40,6 +45,11 @@
                 <transition name="fade">
                     <li class="pure-menu-item">
                         <a class="pure-menu-link" v-if="next_ready" v-on:click="next()">下一章</a>
+                    </li>
+                </transition>
+                <transition name="fade">
+                    <li class="pure-menu-item">
+                        <a class="pure-menu-link" v-if="finished">这是最后一章</a>
                     </li>
                 </transition>
             </ul>
@@ -71,6 +81,9 @@
             <button class="pure-button" style="width: 100%" v-if="next_ready" v-on:click="next()">下一章</button>\
         </transition>
 
+        <transition name="fade" class="footer">
+            <span class="pure-button" style="width: 100%" v-if="finished">这是最后一章</span>\
+        </transition>
 
     </div>
 
@@ -93,13 +106,19 @@ var app = new Vue({
         chapter_id: "",
         title: null,
         contents: [],
-        next_chapter: null
+        next_chapter: null,
+        finished: false
     },
     methods: {
         get_next_chapter: function () {
             this.$http.get("/next/" + this.chapter_id).then(
                 function (res) {
-                    this.next_chapter = res.body;
+                    if(res.body.finished){
+                        this.finished = true;
+                        this.next_chapter = null;
+                    }else{
+                        this.next_chapter = res.body.book;
+                    }
                 },function (res) {
                     console.log(res);
                 }

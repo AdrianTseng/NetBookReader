@@ -130,8 +130,10 @@ def next_chapter_content(this_page):
         db.session.rollback()
     next_chapter = Chapters.query.filter(Chapters.book == chapter.book, Chapters.index > chapter.index).\
         order_by(Chapters.index).first()
+    if next_chapter is None:
+        return jsonify(book=chapter.book, finished=True)
     return jsonify(book=next_chapter.book, title="%s\t%s" % (next_chapter.chapter, next_chapter.title),
-                   content=next_chapter.content, id=next_chapter.id)
+                   content=next_chapter.content, id=next_chapter.id, finished=False)
 
 
 @app.route('/partials/<path:content>.html')
