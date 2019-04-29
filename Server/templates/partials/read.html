@@ -2,23 +2,17 @@
 {% block content %}
 <style type="text/css">
     .header {
-        display: flex;
+        position: sticky;
+        top: 0;
         height: 40px;
-    }
-
-    .footer{
-        display: flex;
-        height: 40px;
+        width: 100%;
+        background: #eee;
     }
 
     .body {
-        display: flex;
-        height: calc(100vh - 40px);
-
-        flex-direction: row;
-        flex-wrap: wrap;
         overflow: auto;
         -webkit-overflow-scrolling: touch;
+        padding-bottom: 50px;
     }
 
     p {
@@ -76,7 +70,7 @@
             </transition>
 
         </div>
-
+        <!--
         <transition name="fade" class="footer">
             <button class="pure-button" style="width: 100%" v-if="next_ready" v-on:click="next()">下一章</button>\
         </transition>
@@ -84,7 +78,7 @@
         <transition name="fade" class="footer">
             <a href="/" class="pure-button" style="width: 100%" v-if="finished">这是最后一章</a>\
         </transition>
-
+        -->
     </div>
 
 <script>
