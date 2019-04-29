@@ -25,7 +25,8 @@ class Reading(db.Model):
 
     def get_progress(self):
         chapter = Chapters.get(self.chapter_id)
-        return "%s_%s_%s_%s" % (self.book, chapter.chapter, chapter.title, chapter.id)
+        remains = Chapters.query.filter(Chapters.book==chapter.book, Chapters.index > chapter.index).count()
+        return "%s_%s_%s_%s_%s" % (self.book, chapter.chapter, chapter.title, chapter.id, remains)
 
     @staticmethod
     def exists(book, user_id):

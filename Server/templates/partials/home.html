@@ -60,6 +60,7 @@
                                     <a class="button-delete" v-on:click="remove(book.book)" v-if="book.show">
                                         <span>-</span></a>
                                 </transition>
+                                <p style="color: deepskyblue">!{ book.remains }</p>
                             </div>
                         </div>
                     </div>
@@ -107,7 +108,8 @@ function init_book(value) {
     if(sub_strs.length === 3)
         return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], show: true};
     else
-        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], page: sub_strs[3], show: true};
+        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], page: sub_strs[3],
+            remains: sub_strs[4], show: true};
 }
 
 function set_invisible(elem, book_name) {
