@@ -16,6 +16,6 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 # 安全相关配置，token-authorization 的周期与 bcryption 加密密码的迭代次数
 SECURITY = {
-    'expiration': 3, # 三个小时过期 3 * 60 * 60
+    'expiration': 24, # 一天的过期时间 24 * 60 * 60
     'iterations': 10
 }

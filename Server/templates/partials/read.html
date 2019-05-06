@@ -1,18 +1,33 @@
 {% extends "layout.html" %}
 {% block content %}
 <style type="text/css">
+
+    body {
+        height: 100%;
+    }
+
+    div#read {
+        height: 100%;
+        min-height: 100%;
+    }
+
     .header {
-        position: sticky;
-        top: 0;
+        position: fixed;
+
         height: 40px;
         width: 100%;
+        top: 0;
         background: #eee;
     }
 
     .body {
-        overflow: auto;
+        overflow-y: auto;
+        padding-bottom: 40px;
+
+        max-width: 768px;
+        margin: 0 auto;
+
         -webkit-overflow-scrolling: touch;
-        padding-bottom: 50px;
     }
 
     p {
