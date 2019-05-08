@@ -4,6 +4,8 @@
 
     body {
         height: 100%;
+        padding: 0;
+        margin: 0;
     }
 
     div#read {
@@ -11,19 +13,25 @@
         min-height: 100%;
     }
 
-    .header {
+    div#header {
         position: fixed;
+        background: #eee;
+        opacity: 100%;
 
+        z-index: 10;
+
+        padding: 0 20px 0 20px;
+        margin: 0 auto;
+
+        top: 0;
         height: 40px;
         width: 100%;
-        top: 0;
-        background: #eee;
     }
 
-    .body {
+    div#content-body {
         overflow-y: auto;
-        padding-bottom: 40px;
 
+        padding: 30px;
         max-width: 768px;
         margin: 0 auto;
 
@@ -44,8 +52,8 @@
 </style>
 
 
-    <div id="read" style="margin: 20pt">
-        <div class="header pure-menu pure-menu-horizontal">
+    <div id="read">
+        <div class="pure-menu pure-menu-horizontal" id="header">
             <a href="/" class="pure-menu-heading pure-menu-link">主页</a>
             <ul class="pure-menu-list">
                 <li class="pure-menu-item">
