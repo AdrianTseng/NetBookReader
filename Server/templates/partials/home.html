@@ -40,8 +40,8 @@
                 <h1>你好，{{ user }}</h1>
             </div>
 
-            <div class="pure-u-md-1-4 pure-u-1-1"></div>
-            <div class="pure-u-md-1-4 pure-u-1-1" style="margin: 2rem">
+            <div class="pure-u-md-1-8 pure-u-1-1"></div>
+            <div class="pure-u-md-3-8 pure-u-1-1" style="margin: 2rem">
                 <transition name="fade">
                     <div class="book-section" v-if="books_empty">
                     <h3>追读列表</h3>
@@ -67,7 +67,7 @@
                 </transition-group>
             </div>
 
-            <div class="pure-u-md-1-4 pure-u-1-1" style="margin: 2rem">
+            <div class="pure-u-md-3-8 pure-u-1-1" style="margin: 2rem">
                 <transition name="fade">
                     <div class="book-section" v-if="pending_empty">
                         <h3>库存小说</h3>
@@ -91,7 +91,7 @@
                 </transition-group>
             </div>
 
-            <div class="pure-u-md-1-4 pure-u-1-1"></div>
+            <div class="pure-u-md-1-8 pure-u-1-1"></div>
         </div>
 
     </div>
@@ -119,13 +119,22 @@ function set_invisible(elem, book_name) {
     return elem;
 }
 
+
+function compare(a, b){
+    if (a.remains < b.remains){
+        return 1;
+    }else if (a.remains > b.remains){
+        return -1;
+    }else return 0;
+}
+
 var app = new Vue({
     el: "#home",
     data: {
 {% if books|length > 0 %}
         books: function () {
             const ori = ["{{ books|join("\", \""|safe) }}"];
-            return ori.map(init_book)
+            return ori.map(init_book).sort(compare)
         }(),
 {% else %}
         books: [],
