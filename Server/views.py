@@ -1,6 +1,6 @@
 __author__ = 'LimeQM'
 
-from flask import render_template, redirect, flash, request, abort, jsonify
+from flask import render_template, redirect, flash, request, abort, jsonify,send_from_directory
 from jinja2 import TemplateNotFound
 from . import app, login_manager, db
 from .models import User, Chapters, Reading
@@ -30,6 +30,11 @@ def home():
                            user=user.username,
                            books=books,
                            pending=pending)
+
+
+@app.route('/<path:filename>')
+def send_static(filename):
+    return send_from_directory("../static", filename)
 
 
 @app.route("/user", methods=["GET", "POST"])
