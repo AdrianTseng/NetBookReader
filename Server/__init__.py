@@ -10,9 +10,12 @@ app.config.from_object(config)
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
 
+REMEMBER_COOKIE_DURATION = 30 * 24 * 60 * 60
+
 login_manager = LoginManager()
-login_manager.session_protection = "strong"
+login_manager.session_protection = "basic"
 login_manager.login_view = "user"
+login_manager.login_message = "请先登陆以访问本页面"
 login_manager.init_app(app=app)
 
 # app.jinja_env.variable_start_string = '{{ '
