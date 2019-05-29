@@ -43,7 +43,7 @@ def user():
     if form.validate_on_submit():
         _user = User.find(form.username.data)
         if _user and _user.verify_password(form.password.data):
-            login_user(user=_user, remember=True, duration=timedelta(hours=3))
+            login_user(user=_user, remember=True, duration=timedelta(days=15))
             if request.args.get('next'):
                 return redirect(request.args.get('next'))
             else:

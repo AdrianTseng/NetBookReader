@@ -5,12 +5,13 @@ from flask_login import LoginManager
 import config
 
 
+REMEMBER_COOKIE_DURATION = 30 * 24 * 60 * 60
+
+
 app = Flask(__name__, static_folder='../static')
 app.config.from_object(config)
 db = SQLAlchemy(app)
 csrf = CSRFProtect(app)
-
-REMEMBER_COOKIE_DURATION = 30 * 24 * 60 * 60
 
 login_manager = LoginManager()
 login_manager.session_protection = "basic"
