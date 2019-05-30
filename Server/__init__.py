@@ -5,7 +5,7 @@ from flask_login import LoginManager
 import config
 
 
-REMEMBER_COOKIE_DURATION = 30 * 24 * 60 * 60
+REMEMBER_COOKIE_DURATION = 24 * 60 * 60 * config.LOGIN_DAYS
 
 
 app = Flask(__name__, static_folder='../static')

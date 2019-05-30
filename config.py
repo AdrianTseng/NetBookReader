@@ -14,8 +14,11 @@ SQLALCHEMY_DATABASE_URI = secret_content[0] if secret_content is not None \
 SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
+LOGIN_DAYS = 10
+
+
 # 安全相关配置，token-authorization 的周期与 bcryption 加密密码的迭代次数
 SECURITY = {
-    'expiration': 10 * 24 * 60 * 60, # 一天的过期时间 24 * 60 * 60
+    'expiration': LOGIN_DAYS * 24 * 60 * 60, # 一天的过期时间 24 * 60 * 60
     'iterations': 10
 }

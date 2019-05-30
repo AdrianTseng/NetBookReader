@@ -8,6 +8,7 @@ from .blueprints.Users.SigninForm import SigninForm
 from flask_login import login_user, login_required, current_user
 from datetime import timedelta
 from sqlalchemy.exc import SQLAlchemyError
+from config import LOGIN_DAYS
 
 
 @login_manager.user_loader
@@ -43,7 +44,7 @@ def user():
     if form.validate_on_submit():
         _user = User.find(form.username.data)
         if _user and _user.verify_password(form.password.data):
-            login_user(user=_user, remember=True, duration=timedelta(days=15))
+            login_user(user=_user, remember=True, duration=timedelta(days=LOGIN_DAYS))
             if request.args.get('next'):
                 return redirect(request.args.get('next'))
             else:
