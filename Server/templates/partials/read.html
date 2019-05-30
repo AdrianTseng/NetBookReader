@@ -1,13 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
 <style type="text/css">
-
-    body {
-        height: 100%;
-        padding: 0;
-        margin: 0;
-    }
-
     div#read {
         height: 100%;
         min-height: 100%;
@@ -15,25 +8,18 @@
 
     div#header {
         position: fixed;
-        background: #eee;
-        opacity: 100%;
-
-        z-index: 10;
-
-        padding: 0 20px 0 20px;
-        margin: 0 auto;
-
         top: 0;
-        height: 40px;
+        left: 0;
         width: 100%;
     }
 
     div#content-body {
         overflow-y: auto;
 
-        padding: 30px;
+        padding: 24px;
         max-width: 768px;
         margin: 0 auto;
+        margin-top: 60px;
 
         -webkit-overflow-scrolling: touch;
     }
@@ -43,55 +29,53 @@
         font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 
-    .fade-enter-active, .fade-leave-active {
-      transition: opacity .5s;
-    }
-    .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-      opacity: 0;
-    }
+    .v-leave { opacity: 1; }
+    .v-leave-active { transition: opacity 2s }
+    .v-leave-to { opacity: 0; }
+    .v-enter { opacity: 0; }
+    .v-enter-active  { transition: opacity 2s }
+    .v-enter-to { opacity: 1; }
 </style>
 
-
     <div id="read">
-        <div class="pure-menu pure-menu-horizontal" id="header">
-            <a href="/" class="pure-menu-heading pure-menu-link">主页</a>
-            <ul class="pure-menu-list">
-                <li class="pure-menu-item">
-                    <a href="/menu/{{ book }}" class="pure-menu-link">目录</a>
-                </li>
-                <transition name="fade">
-                    <li class="pure-menu-item">
-                        <a class="pure-menu-link" v-if="next_ready" v-on:click="next()">下一章</a>
-                    </li>
-                </transition>
-                <transition name="fade">
-                    <li class="pure-menu-item">
-                        <a href="/" class="pure-menu-link" v-if="finished">这是最后一章</a>
-                    </li>
-                </transition>
-            </ul>
+        <div class="top-bar" id="header">
+            <div class="top-bar-left">
+                <ul class="menu">
+                    <li><a href="/">主页</a></li>
+                    <li><a href="/menu/{{ book }}">目录</a></li>
+                    <transition name="fade">
+                        <li v-if="next_ready">
+                            <a v-on:click="next()">下一章</a>
+                        </li>
+                    </transition>
+                    <transition name="fade">
+                        <li v-if="finished">
+                            <a href="/" class="pure-menu-link">这是最后一章</a>
+                        </li>
+                    </transition>
+                </ul>
+            </div>
+            <div class="top-bar-right">
+                <ul class="menu">
+
+                </ul>
+            </div>
         </div>
         <div class="body" id="content-body">
-            <transition name="fade">
+            <transition mode="out-in">
             <div id="waiting" v-if="!ready">
                 <p>等待刷新...</p>
             </div>
+            <div class="chapter" v-else>
+                <h1 style="margin-bottom: 20px">!{ title }</h1>
 
-            </transition>
-            <transition name="fade">
-            <div class="pure-g" v-if="ready">
-                <div class="pure-u-1-1">
-                    <h1>!{ title }</h1>
-                </div>
-
-                <div class="pure-u-1-1">
+                <div class="content">
                     <div v-for="content in contents">
                         <p style="margin: 2px 2px 22px 2px">!{ content }</p>
                     </div>
                 </div>
             </div>
             </transition>
-
         </div>
         <!--
         <transition name="fade" class="footer">

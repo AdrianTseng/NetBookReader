@@ -1,97 +1,53 @@
 {% extends "layout.html" %}
 {% block content %}
     <style type="text/css">
-    .book-entity {
-        background: white;
-    }
+    </style>
 
-    .button-delete {
-        color: red;
-        font-size: 1.5rem;
-    }
+    <div id="home">
 
-    .button-add {
-        color: limegreen;
-        font-size: 1.5rem;
-    }
-
-    .book-enter-active, .book-leave-active {
-        transition: all 1s;
-    }
-
-    .book-enter, .book-leave-to
-        /* .list-leave-active for below version 2.1.8 */ {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-
-    .fade-enter-active, .fade-leave-active {
-      transition: opacity .5s;
-    }
-    .fade-enter, .fade-leave-to /* .fade-leave-active below version 2.1.8 */ {
-      opacity: 0;
-    }
-</style>
-
-
-    <div id="home" style="margin: 20pt;">
-        <div class="pure-g" style="padding: 10px">
-            <div class="pure-u-1-1">
-                <h1>你好，{{ user }}</h1>
+        <div class="grid-y grid-padding-y full">
+            <div class="cell small-2 medium-3">
+                <h1>你好，{{ user }}！</h1>
             </div>
 
-            <div class="pure-u-md-1-8 pure-u-1-1"></div>
-            <div class="pure-u-md-3-8 pure-u-1-1" style="margin: 2rem">
-                <transition name="fade">
-                    <div class="book-section" v-if="books_empty">
-                    <h3>追读列表</h3>
+            <div class="cell small-10 medium-9 small-cell-block-y" style="overflow: auto;">
+                <ul class="tabs" id="home-tabs">
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" href="#reading" v-bind:aria-selected="tab_selected(1)">追读中</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" href="#pending" v-bind:aria-selected="tab_selected(2)">库存</a></li>
+                </ul>
+
+                <div class="tabs-content" data-tabs-content="home-tabs">
+                    <div class="tabs-panel" v-bind:class="{ 'is-active': tab==1 }" id="reading">
+                        <div v-if="!books.length">
+                            <h1>请先添加待追读的小说！</h1>
+                        </div>
+                        <div class="book-list" v-for="book in books" v-bind:key="book.book" v-if="books.length">
+                            <div class="callout primary">
+                                <h4 v-on:click="read(book.book)">!{ book.book } <span class="badge secondary">!{ book.remains }</span></h4>
+                                <p class="book-chapter" v-on:click="read(book.book)">!{ book.chapter }</p>
+
+                                <button class="close-button" aria-label="Dismiss alert" type="button" v-on:click="remove(book.book)" data-close v-if="book.show">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tabs-panel" v-bind:class="{ 'is-active': tab==2 }" id="pending">
+                        <div v-if="!pending.length">
+                            <h1>已经没有未追读的小说了！</h1>
+                        </div>
+                        <div class="book-lists" v-for="book in pending" v-bind:key="book.book" v-if="pending.length">
+                            <div class="callout primary">
+                                <h4>!{ book.book }</h4>
+                                <p class="book-chapter">!{ book.chapter }</p>
+                                <button class="close-button" aria-label="Dismiss success" type="button" v-on:click="add(book.book)" data-close v-if="book.show">
+                                    <span aria-hidden="true">+</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                </transition>
-
-                <transition-group name="book" tag="div" class="book-menu">
-                    <div class="book-list" v-for="book in books" v-bind:key="book.book">
-                        <div class="pure-g" class="book">
-                            <div class="pure-u-4-5" class="book-entity" v-on:click="read(book.book)">
-                                <h4 class="book-title">!{ book.book }</h4>
-                                <h5 class="book-chapter">!{ book.chapter }</h5>
-                            </div>
-                            <div class="pure-u-1-5">
-                                <transition name="fade">
-                                    <a class="button-delete" v-on:click="remove(book.book)" v-if="book.show">
-                                        <span>-</span></a>
-                                </transition>
-                                <p style="color: deepskyblue">!{ book.remains }</p>
-                            </div>
-                        </div>
-                    </div>
-                </transition-group>
             </div>
-
-            <div class="pure-u-md-3-8 pure-u-1-1" style="margin: 2rem">
-                <transition name="fade">
-                    <div class="book-section" v-if="pending_empty">
-                        <h3>库存小说</h3>
-                    </div>
-                </transition>
-                <transition-group name="book" tag="div" class="book-menu">
-                    <div class="book-lists" v-for="book in pending" v-bind:key="book.book">
-                        <div class="pure-g" class="book">
-                            <div class="pure-u-4-5" class="book-entity">
-                                <h4 class="book-title">!{ book.book }</h4>
-                                <h5 class="book-chapter">!{ book.chapter }</h5>
-                            </div>
-                            <div class="pure-u-1-5">
-                                <transition name="fade">
-                                <a class="button-add" v-on:click="add(book.book)" v-if="book.show">
-                                    <span>+</span></a>
-                                </transition>
-                            </div>
-                        </div>
-                    </div>
-                </transition-group>
-            </div>
-
-            <div class="pure-u-md-1-8 pure-u-1-1"></div>
         </div>
 
     </div>
@@ -106,7 +62,7 @@ Vue.http.headers.common["X-CSRFToken"] = "{{ csrf_token() }}";
 function init_book(value) {
     let sub_strs = value.split("_");
     if(sub_strs.length === 3)
-        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], show: true};
+        return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], show:true};
     else
         return {book: sub_strs[0], chapter: sub_strs[1] + " " + sub_strs[2], page: sub_strs[3],
             remains: sub_strs[4], show: true};
@@ -147,15 +103,15 @@ var app = new Vue({
 {% else %}
         pending: [],
 {% endif %}
+        tab: 1,
     },
-
     methods: {
         add: function (book_name) {
             this.pending = this.pending.map(book => set_invisible(book, book_name));
             this.$http.post('/book/add', {book: book_name}, {emulateJSON: true}).then(
                 function(res){
                     this.pending = this.pending.filter(each => each.book !== book_name);
-                    this.books.push(init_book(res.body.book));
+                    this.books.unshift(init_book(res.body.book));
                 },
                 function (res){
                     console.log(res);
@@ -178,7 +134,13 @@ var app = new Vue({
         },
         read: function (book_page) {
             window.location.href = "/read/" + book_page;
-        }
+        },
+        tab_change: function (value) {
+            this.tab = value;
+        },
+        tab_selected: function (tab) {
+            return tab === this.tab;
+        },
     },
     computed: {
         pending_empty: function () {
@@ -186,7 +148,7 @@ var app = new Vue({
         },
         books_empty: function () {
             return this.books.length > 0;
-        }
+        },
     },
     delimiters: ['!{','}']
 });
