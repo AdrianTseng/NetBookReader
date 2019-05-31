@@ -7,13 +7,13 @@
 
         <div class="grid-y grid-padding-y full">
             <div class="cell small-2 medium-3">
-                <h1>你好，{{ user }}！</h1>
+                <h1 style="padding: 20px">你好，{{ user }}！</h1>
             </div>
 
             <div class="cell small-10 medium-9 small-cell-block-y" style="overflow: auto;">
                 <ul class="tabs" id="home-tabs">
-                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" href="#reading" v-bind:aria-selected="tab_selected(1)">追读中</a></li>
-                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" href="#pending" v-bind:aria-selected="tab_selected(2)">库存</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" v-bind:aria-selected="tab_selected(1)">追读中</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" v-bind:aria-selected="tab_selected(2)">库存</a></li>
                 </ul>
 
                 <div class="tabs-content" data-tabs-content="home-tabs">
@@ -22,13 +22,15 @@
                             <h1>请先添加待追读的小说！</h1>
                         </div>
                         <div class="book-list" v-for="book in books" v-bind:key="book.book" v-if="books.length">
-                            <div class="callout primary">
-                                <h4 v-on:click="read(book.book)">!{ book.book } <span class="badge secondary">!{ book.remains }</span></h4>
+                            <div class="callout secondary small">
+                                <div class="grid-x">
+                                    <h4 class="cell shrink" v-on:click="read(book.book)"><span class="badge" v-bind:class="{ 'primary': book.remains >0, 'secondary': book.remains < 1 }">!{ book.remains }</span>&nbsp;!{ book.book }</h4>
+                                    <div class="cell auto" v-on:click="read(book.book)"></div>
+                                    <button class="cell shrink" type="button" v-if="book.show" v-on:click="remove(book.book)" aria-label="Dismiss alert">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
                                 <p class="book-chapter" v-on:click="read(book.book)">!{ book.chapter }</p>
-
-                                <button class="close-button" aria-label="Dismiss alert" type="button" v-on:click="remove(book.book)" data-close v-if="book.show">
-                                    <span aria-hidden="true">&times;</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -37,12 +39,15 @@
                             <h1>已经没有未追读的小说了！</h1>
                         </div>
                         <div class="book-lists" v-for="book in pending" v-bind:key="book.book" v-if="pending.length">
-                            <div class="callout primary">
-                                <h4>!{ book.book }</h4>
+                            <div class="callout small">
+                                <div class="grid-x" v-on:click="read(book.book)">
+                                    <h4 class="cell shrink">!{ book.book }</h4>
+                                    <div class="cell auto"></div>
+                                    <button class="cell shrink" type="button" v-if="book.show" v-on:click="add(book.book)" aria-label="Dismiss success">
+                                        <span class="large" aria-hidden="true">&hearts;</span>
+                                    </button>
+                                </div>
                                 <p class="book-chapter">!{ book.chapter }</p>
-                                <button class="close-button" aria-label="Dismiss success" type="button" v-on:click="add(book.book)" data-close v-if="book.show">
-                                    <span aria-hidden="true">+</span>
-                                </button>
                             </div>
                         </div>
                     </div>
@@ -104,6 +109,10 @@ var app = new Vue({
         pending: [],
 {% endif %}
         tab: 1,
+        according: {
+            books: null,
+            pending: null
+        }
     },
     methods: {
         add: function (book_name) {
@@ -112,19 +121,20 @@ var app = new Vue({
                 function(res){
                     this.pending = this.pending.filter(each => each.book !== book_name);
                     this.books.unshift(init_book(res.body.book));
+                    this.according.books = this.books[0].book;
                 },
                 function (res){
                     console.log(res);
                     window.location.reload();
                 });
         },
-
         remove: function (book_name) {
             this.books = this.books.map(book => set_invisible(book, book_name));
             this.$http.post('/book/remove', {book: book_name}, {emulateJSON: true}).then(
                 function (res) {
                     this.books = this.books.filter(each => each.book !== book_name);
                     this.pending.push(init_book(res.body.book));
+                    this.according.pending = this.pending[0].book;
                 },
                 function (res) {
                     console.log(res);
@@ -141,13 +151,17 @@ var app = new Vue({
         tab_selected: function (tab) {
             return tab === this.tab;
         },
-    },
-    computed: {
-        pending_empty: function () {
-            return this.pending.length > 0;
+        pending_set_active: function (name) {
+            this.according.pending = name;
         },
-        books_empty: function () {
-            return this.books.length > 0;
+        books_set_active: function (name) {
+            this.according.books = name;
+        },
+        pending_active: function (name) {
+            return name === this.according.pending;
+        },
+        books_active: function (name) {
+            return name === this.according.books;
         },
     },
     delimiters: ['!{','}']
