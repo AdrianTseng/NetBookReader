@@ -38,9 +38,9 @@
                         <div v-if="!pending.length">
                             <h1>已经没有未追读的小说了！</h1>
                         </div>
-                        <div class="book-lists" v-for="book in pending" v-bind:key="book.book" v-if="pending.length">
+                        <div class="pending-lists" v-for="book in pending" v-bind:key="book.book" v-if="pending.length">
                             <div class="callout small">
-                                <div class="grid-x" v-on:click="read(book.book)">
+                                <div class="grid-x">
                                     <h4 class="cell shrink">!{ book.book }</h4>
                                     <div class="cell auto"></div>
                                     <button class="cell shrink" type="button" v-if="book.show" v-on:click="add(book.book)" aria-label="Dismiss success">
