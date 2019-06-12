@@ -41,23 +41,18 @@
         <div id="header" class="top-bar">
             <div class="top-bar-left">
                 <ul class="menu">
-                    <li class="menu-text">{{ book }}&nbsp;</li>
+                    <li class="menu-text show-for-medium">{{ book }}&nbsp;</li>
                     <li><a href="/"><span class="fa fa-home"></span></a></li>
                     <li v-if="!downloading"><a v-on:click="download()"><span class="fa fa-cloud-download"></span></a></li>
                     <li class="menu-text" v-if="downloading"><span class="fa fa-spinner fa-spin"></span></li>
-
-                </ul>
-            </div>
-            <div class="top-bar-right">
-                <ul class="menu">
-                    <li><input type="search" placeholder="检索章节" v-model="search"></li>
+                    <li><input type="search" placeholder="检索《{{ book }}》的章节" v-model="search"></li>
                 </ul>
             </div>
         </div>
         <div id="body">
             <table>
                 <transition-group name="menu" tag="tbody">
-                    <tr v-on:click="select(menu.id)" v-for="menu in filtered" v-bind:key="menu.menu">
+                    <tr v-on:click="select(menu.id)" v-for="menu in filtered" v-bind:key="menu.key">
                         <td>!{ menu.menu }</td>
                     </tr>
                 </transition-group>
@@ -98,7 +93,7 @@ var app = new Vue({
             this.downloading = true;
             this.$http.post("/download", {book: "{{ book }}", emulateJSON: true}).then(
                 function (res) {
-                    let data = new Blob([res.data.data], {type: 'text/md'});
+                    let data = new Blob([res.data.data], {encoding: "UTF-8", type: 'text/md;charset="UTF-8'});
                     var elem = window.document.createElement('a');
                     elem.href = window.URL.createObjectURL(data);
                     elem.download = "{{ book }}.md";
@@ -130,7 +125,8 @@ var app = new Vue({
                let vs = v.split("_");
                return {
                    menu: vs[0],
-                   id: vs[1]
+                   id: vs[1],
+                   key: v
                }
             }(value));
         }();

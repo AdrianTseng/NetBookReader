@@ -150,7 +150,7 @@ def partials(content):
 
 
 @app.route("/download", methods=["POST"])
-@fresh_login_required
+@login_required
 def get_download_book():
     book = str(request.json["book"])
     return jsonify(data=Chapters.download(book))
