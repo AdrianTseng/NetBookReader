@@ -49,5 +49,18 @@ class Chapters(db.Model):
     def get(chapter_id):
         return Chapters.query.get(chapter_id)
 
+    @staticmethod
+    def download(book_name):
+        chapters = Chapters.query.filter_by(book=book_name).order_by(Chapters.index).all()
+
+        doc = ""
+        doc += "#%s\n\n" % book_name
+
+        for c in chapters:
+            doc += "\n\n##%s %s\n\n" % (c.chapter, c.title)
+            doc += c.content
+
+        return doc
+
     def menu(self):
         return "%s\t%s_%s" % (self.chapter, self.title, self.id)

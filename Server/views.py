@@ -1,15 +1,14 @@
 __author__ = 'LimeQM'
 
-from flask import render_template, redirect, flash, request, abort, jsonify,send_from_directory
+from flask import render_template, redirect, flash, request, abort, jsonify, send_from_directory, send_file
 from jinja2 import TemplateNotFound
 from . import app, login_manager, db
 from .models import User, Chapters, Reading
 from .blueprints.Users.SigninForm import SigninForm
-from flask_login import login_user, login_required, current_user
+from flask_login import login_user, login_required, current_user, fresh_login_required
 from datetime import timedelta
 from sqlalchemy.exc import SQLAlchemyError
 from config import LOGIN_DAYS
-
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -45,8 +44,8 @@ def user():
         _user = User.find(form.username.data)
         if _user and _user.verify_password(form.password.data):
             login_user(user=_user, remember=True, duration=timedelta(days=LOGIN_DAYS))
-            if request.args.get('next'):
-                return redirect(request.args.get('next'))
+            if (request.base_url in request.referrer) and ("user" not in request.referrer):
+                return redirect(request.referrer)
             else:
                 return redirect("/")
         flash("用户名或者密码错误")
@@ -148,3 +147,10 @@ def partials(content):
         return render_template("/partials/%s.html" % content, module=content)
     except TemplateNotFound:
         abort(404)
+
+
+@app.route("/download", methods=["POST"])
+@fresh_login_required
+def get_download_book():
+    book = str(request.json["book"])
+    return jsonify(data=Chapters.download(book))

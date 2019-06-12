@@ -42,6 +42,14 @@
             <div class="top-bar-left">
                 <ul class="menu">
                     <li class="menu-text">{{ book }}&nbsp;</li>
+                    <li><a href="/"><span class="fa fa-home"></span></a></li>
+                    <li v-if="!downloading"><a v-on:click="download()"><span class="fa fa-cloud-download"></span></a></li>
+                    <li class="menu-text" v-if="downloading"><span class="fa fa-spinner fa-spin"></span></li>
+
+                </ul>
+            </div>
+            <div class="top-bar-right">
+                <ul class="menu">
                     <li><input type="search" placeholder="检索章节" v-model="search"></li>
                 </ul>
             </div>
@@ -74,6 +82,7 @@ var app = new Vue({
     data: {
         chapters: null,
         search: "",
+        downloading: false
     },
     methods: {
         select: function (id) {
@@ -85,6 +94,25 @@ var app = new Vue({
                 }
             );
         },
+        download: function () {
+            this.downloading = true;
+            this.$http.post("/download", {book: "{{ book }}", emulateJSON: true}).then(
+                function (res) {
+                    let data = new Blob([res.data.data], {type: 'text/md'});
+                    var elem = window.document.createElement('a');
+                    elem.href = window.URL.createObjectURL(data);
+                    elem.download = "{{ book }}.md";
+                    document.body.appendChild(elem);
+                    elem.click();
+                    document.body.removeChild(elem);
+
+                    this.downloading = false;
+                },function (res) {
+                    console.log(res);
+                    this.downloading = false;
+                }
+            );
+        }
     },
     computed: {
         filtered: function () {

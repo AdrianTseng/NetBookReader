@@ -12,8 +12,8 @@
 
             <div class="cell small-10 medium-9 small-cell-block-y" style="overflow: auto;">
                 <ul class="tabs" id="home-tabs">
-                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" v-bind:aria-selected="tab_selected(1)">追读中</a></li>
-                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" v-bind:aria-selected="tab_selected(2)">库存</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" v-bind:aria-selected="tab_selected(1)"><span class="fa fa-book"></span>追读中</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" v-bind:aria-selected="tab_selected(2)"><span class="fa fa-archive"></span>库存</a></li>
                 </ul>
 
                 <div class="tabs-content" data-tabs-content="home-tabs">
@@ -27,7 +27,7 @@
                                     <h4 class="cell shrink" v-on:click="read(book.book)"><span class="badge" v-bind:class="{ 'primary': book.remains >0, 'secondary': book.remains < 1 }">!{ book.remains }</span>&nbsp;!{ book.book }</h4>
                                     <div class="cell auto" v-on:click="read(book.book)"></div>
                                     <button class="cell shrink" type="button" v-if="book.show" v-on:click="remove(book.book)" aria-label="Dismiss alert">
-                                        <span aria-hidden="true">&times;</span>
+                                        <span class="fa fa-eye-slash  fa-lg" aria-hidden="true"></span>
                                     </button>
                                 </div>
                                 <p class="book-chapter" v-on:click="read(book.book)">!{ book.chapter }</p>
@@ -38,18 +38,26 @@
                         <div v-if="!pending.length">
                             <h1>已经没有未追读的小说了！</h1>
                         </div>
-                        <div class="pending-lists" v-for="book in pending" v-bind:key="book.book" v-if="pending.length">
-                            <div class="callout small">
-                                <div class="grid-x">
-                                    <h4 class="cell shrink">!{ book.book }</h4>
-                                    <div class="cell auto"></div>
-                                    <button class="cell shrink" type="button" v-if="book.show" v-on:click="add(book.book)" aria-label="Dismiss success">
-                                        <span class="large" aria-hidden="true">&hearts;</span>
-                                    </button>
+                        <div v-if="pending.length">
+                            <div class="input-group">
+                                <div class="input-group-label"><span class="fa fa-search"></span></div>
+                                <input class="input-group-field" type="search" placeholder="检索章节" v-model="search">
+                            </div>
+                            <div class="pending-lists" v-for="book in filtered" v-bind:key="book.book">
+                                <div class="callout small">
+                                    <div class="grid-x">
+                                        <h4 class="cell shrink">!{ book.book }</h4>
+                                        <div class="cell auto"></div>
+                                        <button class="cell shrink" type="button" v-if="book.show" v-on:click="add(book.book)" aria-label="Dismiss success">
+                                            <span class="fa fa-eye fa-lg" aria-hidden="true"></span>
+                                        </button>
+                                    </div>
+                                    <p class="book-chapter">!{ book.chapter }</p>
                                 </div>
-                                <p class="book-chapter">!{ book.chapter }</p>
                             </div>
                         </div>
+
+
                     </div>
                 </div>
             </div>
@@ -109,10 +117,20 @@ var app = new Vue({
         pending: [],
 {% endif %}
         tab: 1,
+        search: "",
         according: {
             books: null,
             pending: null
         }
+    },
+    computed: {
+        filtered: function () {
+            if(this.search === ""){
+                return this.pending;
+            }else{
+                return this.pending.filter(each => each.book.includes(this.search));
+            }
+        },
     },
     methods: {
         add: function (book_name) {
