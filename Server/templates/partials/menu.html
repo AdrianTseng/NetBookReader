@@ -50,13 +50,19 @@
             </div>
         </div>
         <div id="body">
-            <table>
+            <table v-if="!downloading">
                 <transition-group name="menu" tag="tbody">
                     <tr v-on:click="select(menu.id)" v-for="menu in filtered" v-bind:key="menu.key">
                         <td>!{ menu.menu }</td>
                     </tr>
                 </transition-group>
             </table>
+            <div v-if="downloading">
+                <h2>下载《{{ book }}》中</h2>
+                <p>请稍等一段时间，不要关闭本页</p>
+                <br>
+                <p>整本小说以 Markdown 格式组成，可以通过其他 App 转换成 PDF/WORD 文件，发送至 Kindle 以获取更好的阅读体验。</p>
+            </div>
         </div>
     </div>
 
