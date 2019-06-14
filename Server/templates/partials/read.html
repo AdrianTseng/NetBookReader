@@ -49,10 +49,6 @@
                 <ul class="menu">
                     <li><a href="/"><span class="fa fa-home"></span></a></li>
                     <li><a href="/menu/{{ book }}"><span class="fa fa-list-ol"></span></a></li>
-                </ul>
-            </div>
-            <div class="top-bar-right">
-                <ul class="menu">
                     <transition name="fade">
                         <li v-if="next_ready">
                             <a v-on:click="next()"><span class="fa fa-chevron-right"></span></a>
