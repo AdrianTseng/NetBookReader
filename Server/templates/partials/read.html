@@ -47,16 +47,16 @@
         <div class="top-bar" id="header">
             <div class="top-bar-left">
                 <ul class="menu">
-                    <li><a href="/"><span class="fa fa-home"></span></a></li>
-                    <li><a href="/menu/{{ book }}"><span class="fa fa-list-ol"></span></a></li>
+                    <li><a href="/"><span class="fa fa-home fa-lg"></span></a></li>
+                    <li><a href="/menu/{{ book }}"><span class="fa fa-list-ol fa-lg"></span></a></li>
                     <transition name="fade">
                         <li v-if="next_ready">
-                            <a v-on:click="next()"><span class="fa fa-chevron-right"></span></a>
+                            <a v-on:click="next()"><span class="fa fa-chevron-right fa-lg"></span></a>
                         </li>
                     </transition>
                     <transition name="fade">
                         <li v-if="finished">
-                            <a href="/"><span class="fa fa-door-open"></span></a>
+                            <a href="/"><span class="fa fa-spinner fa-lg"></span></a>
                         </li>
                     </transition>
                 </ul>
