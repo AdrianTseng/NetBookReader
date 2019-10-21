@@ -7,7 +7,7 @@ from .models import User, Chapters, Reading
 from .blueprints.Users.SigninForm import SigninForm
 from flask_login import login_user, login_required, current_user, fresh_login_required
 from datetime import timedelta
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from config import LOGIN_DAYS
 
 @login_manager.user_loader
@@ -23,7 +23,10 @@ def extract_book_name(book_str):
 @login_required
 def home():
     user = current_user
-    books = [each.get_progress() for each in user.books]
+    try:
+        books = [each.get_progress() for each in user.books]
+    except OperationalError:
+        books = [each.get_progress() for each in user.books]
     books_name = [extract_book_name(each) for each in books]
     pending = [each for each in Chapters.get_books() if extract_book_name(each) not in books_name]
     return render_template("/partials/home.html", dev="vue/dist/vue.js" if app.debug else "vue",
@@ -41,7 +44,10 @@ def send_static(filename):
 def user():
     form = SigninForm()
     if form.validate_on_submit():
-        _user = User.find(form.username.data)
+        try:
+            _user = User.find(form.username.data)
+        except OperationalError:
+            _user = User.find(form.username.data)
         if _user and _user.verify_password(form.password.data):
             login_user(user=_user, remember=True, duration=timedelta(days=LOGIN_DAYS))
             if (request.base_url in request.referrer) and ("user" not in request.referrer):
@@ -107,7 +113,11 @@ def get_menu(book):
 @app.route("/read/<path:book>")
 @login_required
 def read_book(book):
-    reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+    try:
+        reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+    except OperationalError:
+        reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+
     return render_template("/partials/read.html", dev="vue/dist/vue.js" if app.debug else "vue",
                            chapter_id=reading.chapter_id if reading is not None else None, book=book)
 
@@ -115,7 +125,10 @@ def read_book(book):
 @app.route("/current/<path:this_chapter>")
 @login_required
 def this_chapter_content(this_chapter):
-    chapter = Chapters.get(this_chapter)
+    try:
+        chapter = Chapters.get(this_chapter)
+    except OperationalError:
+        chapter = Chapters.get(this_chapter)
     if chapter is not None:
         return jsonify(book=chapter.book, title="%s\t%s" % (chapter.chapter, chapter.title),
                    content=chapter.content, id=chapter.id)
@@ -126,7 +139,10 @@ def this_chapter_content(this_chapter):
 @app.route("/next/<path:this_page>")
 @login_required
 def next_chapter_content(this_page):
-    chapter = Chapters.get(this_page)
+    try:
+        chapter = Chapters.get(this_page)
+    except OperationalError:
+        chapter = Chapters.get(this_page)
     reading = Reading.query.filter(Reading.book == chapter.book, Reading.user_id == current_user.id).first()
     reading.chapter_id = this_page
     try:

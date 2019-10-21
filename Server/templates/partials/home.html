@@ -90,9 +90,9 @@ function set_invisible(elem, book_name) {
 
 
 function compare(a, b){
-    if (a.remains < b.remains){
+    if (int(a.remains) < int(b.remains)){
         return 1;
-    }else if (a.remains > b.remains){
+    }else if (int(a.remains) > int(b.remains)){
         return -1;
     }else return 0;
 }
