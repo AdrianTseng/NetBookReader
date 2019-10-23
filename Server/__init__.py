@@ -31,6 +31,8 @@ login_manager.init_app(app=app)
 
 from . import views, models
 
+from .models import BannedUrls
+
 from .blueprints.Home import home
 from .blueprints.Users import user
 

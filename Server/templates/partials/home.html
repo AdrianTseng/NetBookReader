@@ -1,6 +1,15 @@
 {% extends "layout.html" %}
 {% block content %}
     <style type="text/css">
+        .input-group-rounded .input-group-field {
+          border-radius: 5000px 0 0 5000px;
+          padding-left: 1rem;
+        }
+
+        .input-group-rounded .input-group-button .button {
+          border-radius: 0 5000px 5000px 0;
+          font-size: 0.8rem;
+        }
     </style>
 
     <div id="home">
@@ -13,7 +22,8 @@
             <div class="cell small-10 medium-9 small-cell-block-y" style="overflow: auto;">
                 <ul class="tabs" id="home-tabs">
                     <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(1)" v-bind:aria-selected="tab_selected(1)"><span class="fa fa-book"></span>追读中</a></li>
-                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==1 }"><a v-on:click="tab_change(2)" v-bind:aria-selected="tab_selected(2)"><span class="fa fa-archive"></span>库存</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==2 }"><a v-on:click="tab_change(2)" v-bind:aria-selected="tab_selected(2)"><span class="fa fa-archive"></span>库存</a></li>
+                    <li class="tabs-title" v-bind:class="{ 'is-active': tab==3 }"><a v-on:click="tab_change(3)" v-bind:aria-selected="tab_selected(3)"><span class="fa fa-search-plus"></span>添加</a></li>
                 </ul>
 
                 <div class="tabs-content" data-tabs-content="home-tabs">
@@ -43,7 +53,7 @@
                                 <div class="input-group-label"><span class="fa fa-search"></span></div>
                                 <input class="input-group-field" type="search" placeholder="检索章节" v-model="search">
                             </div>
-                            <div class="pending-lists" v-for="book in filtered" v-bind:key="book.book">
+                            <div class="pending-list" v-for="book in filtered" v-bind:key="book.book">
                                 <div class="callout small">
                                     <div class="grid-x">
                                         <h4 class="cell shrink">!{ book.book }</h4>
@@ -58,6 +68,33 @@
                         </div>
 
 
+                    </div>
+                    <div class="tabs-panel" v-bind:class="{ 'is-active': tab==3 }" id="inventory">
+                        <div class="input-group input-group-rounded">
+                            <input type="search" class="input-group-field" placeholder="请输入要添加的书目" v-model="add_s">
+                            <div class="input-group-button">
+                                <button class="button secondary" v-on:click="search_for_add()">寻找</button>
+                            </div>
+                        </div>
+                        <div class="search-result">
+                            <div v-if="!add_inventory.length">
+                                <h1>暂时还没有查找到相关小说!</h1>
+                            </div>
+                            <div v-if="add_inventory.length">
+                                <div class="inventory-resource-list" v-for="book in add_inventory" v-bind:key="book.url">
+                                    <div class="callout small">
+                                        <div class="grid-x">
+                                            <h4 class="cell shrink">!{ book.book }</h4>
+                                            <div class="cell auto"></div>
+                                            <button class="cell shrink" type="button" v-on:click="collect(book)" aria-label="Dismiss success">
+                                                <span class="fa fa-shopping-bag fa-lg" aria-hidden="true"></span>
+                                            </button>
+                                        </div>
+                                        <p class="book-chapter">!{ book.author }</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -123,6 +160,8 @@ var app = new Vue({
 {% endif %}
         tab: 1,
         search: "",
+        add_s: "",
+        add_inventory: [],
         according: {
             books: null,
             pending: null
@@ -135,7 +174,7 @@ var app = new Vue({
             }else{
                 return this.pending.filter(each => each.book.includes(this.search));
             }
-        },
+        }
     },
     methods: {
         add: function (book_name) {
@@ -168,6 +207,18 @@ var app = new Vue({
         read: function (book_page) {
             window.location.href = "/read/" + book_page;
         },
+        collect: function (book_entity){
+            let temp = this.add_inventory;
+            this.add_inventory = this.add_inventory.filter(item => item !== book_entity);
+            this.$http.post("/book/collect", book_entity, {emulateJSON: true}).then(
+                function (res) {
+                    alert(res.data.data.reason);
+                }, function (res) {
+                    this.add_inventory = temp;
+                    console.error(res);
+                }
+            )
+        },
         tab_change: function (value) {
             this.tab = value;
         },
@@ -185,6 +236,16 @@ var app = new Vue({
         },
         books_active: function (name) {
             return name === this.according.books;
+        },
+        search_for_add: function () {
+            this.$http.post('/book/search', {book: this.add_s}, {emulateJSON: true}).then(
+                function (res) {
+                    this.add_inventory = res.data.data;
+                },
+                function (res) {
+                    console.log(res);
+                }
+            );
         },
     },
     delimiters: ['!{','}']

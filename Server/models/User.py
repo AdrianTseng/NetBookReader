@@ -13,7 +13,9 @@ class User(UserMixin, db.Model):
     id = db.Column(UUID(as_uuid=True), primary_key=True)
     username = db.Column(db.String(64), unique=True)
     password_hash = db.Column(db.String(128))
+    admin = db.Column(db.BOOLEAN(), default=False, nullable=False)
     books = db.relationship('Reading', backref='books', lazy=True)
+    added_books = db.relationship("Inventory", back_populates="user")
 
     def __init__(self, username):
         self.username = username

@@ -3,12 +3,13 @@ __author__ = 'LimeQM'
 from flask import render_template, redirect, flash, request, abort, jsonify, send_from_directory, send_file
 from jinja2 import TemplateNotFound
 from . import app, login_manager, db
-from .models import User, Chapters, Reading
+from .models import User, Chapters, Reading, Inventory
 from .blueprints.Users.SigninForm import SigninForm
 from flask_login import login_user, login_required, current_user, fresh_login_required
-from datetime import timedelta
+from datetime import timedelta, datetime
 from sqlalchemy.exc import SQLAlchemyError, OperationalError
 from config import LOGIN_DAYS
+
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -62,12 +63,13 @@ def user():
 @login_required
 def add_book():
     data = str(request.form.get("book"))
-    if Reading.exists(data, current_user.id):
+    book = Inventory.get_book(data)
+    if Reading.exists(book, current_user.id):
         res = jsonify(success=False)
         res.status_code = 404
         return res
 
-    reading = Reading(data, current_user.id)
+    reading = Reading(book, current_user.id)
     try:
         db.session.add(reading)
         db.session.commit()
@@ -83,7 +85,9 @@ def add_book():
 @login_required
 def remove_book():
     data = str(request.form.get("book"))
-    reading = Reading.query.filter(Reading.book == data, Reading.user_id == current_user.id).first()
+    book = Inventory.get_book(data)
+    reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+    book.vacant_date = datetime.utcnow()
     try:
         db.session.delete(reading)
         db.session.commit()
@@ -101,10 +105,11 @@ def remove_book():
 @login_required
 def get_menu(book):
     if request.method == "POST":
-        reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+        book_item = Inventory.get_book(book)
+        reading = Reading.query.filter(Reading.book == book_item, Reading.user_id == current_user.id).first()
         reading.chapter_id = request.form.get("id")
         db.session.commit()
-        return jsonify(book=reading.book)
+        return jsonify(book=reading.book.book)
     chapters = Chapters.query.filter_by(book=book).order_by(Chapters.index.desc()).all()
     return render_template("/partials/menu.html", dev="vue/dist/vue.js" if app.debug else "vue",
                            book=book, menus=[each.menu() for each in chapters])
@@ -113,13 +118,11 @@ def get_menu(book):
 @app.route("/read/<path:book>")
 @login_required
 def read_book(book):
-    try:
-        reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
-    except OperationalError:
-        reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
+    book = Inventory.get_book(book)
+    reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
 
     return render_template("/partials/read.html", dev="vue/dist/vue.js" if app.debug else "vue",
-                           chapter_id=reading.chapter_id if reading is not None else None, book=book)
+                           chapter_id=reading.chapter_id if reading is not None else None, book=book.book)
 
 
 @app.route("/current/<path:this_chapter>")
@@ -139,11 +142,9 @@ def this_chapter_content(this_chapter):
 @app.route("/next/<path:this_page>")
 @login_required
 def next_chapter_content(this_page):
-    try:
-        chapter = Chapters.get(this_page)
-    except OperationalError:
-        chapter = Chapters.get(this_page)
-    reading = Reading.query.filter(Reading.book == chapter.book, Reading.user_id == current_user.id).first()
+    chapter = Chapters.get(this_page)
+    book = Inventory.get_book(chapter.book)
+    reading = Reading.query.filter(Reading.book == book, Reading.user_id == current_user.id).first()
     reading.chapter_id = this_page
     try:
         db.session.commit()
@@ -170,3 +171,68 @@ def partials(content):
 def get_download_book():
     book = str(request.json["book"])
     return jsonify(data=Chapters.download(book))
+
+
+@app.route("/book/search", methods=["POST"])
+@login_required
+def search_for_add_inventory():
+    import requests
+    from bs4 import BeautifulSoup
+
+    book_name = request.form.get("book")
+
+    prefix_url = "https://m.qu.la"
+    headers = {
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'Accept-Language': 'en',
+        'Accept-Encoding':'gzip, deflate, sdch',
+        'Accept-Language':'zh-CN,zh;q=0.8',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
+        'Cache-Control':'max-age=0',
+        'Connection':'keep-alive',
+        'Referer': "https://m.qu.la"
+    }
+
+    prefix_html = requests.get(prefix_url, headers)
+    prefix_soup = BeautifulSoup(prefix_html.text, 'lxml')
+    prefix_item = prefix_soup.select(".searchForm > input[type=hidden]")
+    prefix_data = set(["%s=%s" % (each.get("name"), each.get("value")) for each in prefix_item])
+
+    search_url = "https://sou.xanbhx.com/search?q=%s&%s" % (book_name, "&".join(prefix_data))
+    search_html = requests.get(search_url, headers, verify=False)
+    search_soup = BeautifulSoup(search_html.text, 'lxml')
+    search_item = search_soup.select("body > div.recommend.mybook > div.hot_sale > a")
+    search_result = [{"book": item.select_one(".title").text.strip(),
+                      "author": item.select_one(".author").text.strip().split("：")[1],
+                      "url": item.attrs["href"]} for item in search_item]
+
+    return jsonify(data=search_result)
+
+
+@app.route("/book/collect", methods=["POST"])
+@login_required
+def collect_for_inventory():
+    book_name = request.form.get("book")
+    author = request.form.get("author")
+    book_url = request.form.get("url")
+
+    user = current_user
+
+    if Inventory.exists(book_url):
+        return jsonify(data={"reason": "这本书我们已经收藏了，去库存中看看吧！"})
+
+    added_books = user.added_books
+    if not user.admin and len(added_books) > 0:
+        latest_collect_date = max([each.added_date for each in added_books])
+        if latest_collect_date + timedelta(days=1) > datetime.utcnow():
+            return jsonify(data={"reason": "为了保证服务器资源，普通用户一天只能添加一本书。。"})
+
+    new_book = Inventory(book_name, author, book_url)
+    new_book.user = user
+
+    db.session.add(new_book)
+    db.session.commit()
+
+    return jsonify(data={"reason": "收藏成功，我们要先准备一下，等过一段时间再去库存中看看吧。"})
+
+
