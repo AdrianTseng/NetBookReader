@@ -1,12 +1,19 @@
 from flask import Flask
 from flask_wtf import CSRFProtect
+# from flask_sqlalchemy import SQLAlchemy as _BaseSQLAlchemy
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 import config
 
+'''
+class SQLAlchemy(_BaseSQLAlchemy):
+    def apply_pool_defaults(self, app, options):
+        super(SQLAlchemy, self).apply_pool_defaults(self, app, options)
+        options["pool_pre_ping"] = True
+'''
+
 
 REMEMBER_COOKIE_DURATION = 24 * 60 * 60 * config.LOGIN_DAYS
-
 
 app = Flask(__name__, static_folder='../static')
 app.config.from_object(config)

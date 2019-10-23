@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from flask_bcrypt import generate_password_hash, check_password_hash
 import uuid
 from config import SECURITY
+from sqlalchemy.exc import OperationalError
 
 
 class User(UserMixin, db.Model):
@@ -46,4 +47,9 @@ class User(UserMixin, db.Model):
 
     @staticmethod
     def get(user_id):
-        return User.query.get(user_id)
+        try:
+            res = User.query.get(user_id)
+        except OperationalError:
+            res = User.query.get(user_id)
+
+        return res

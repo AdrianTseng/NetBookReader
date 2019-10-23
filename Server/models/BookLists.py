@@ -4,7 +4,7 @@ from .User import User
 import uuid
 
 
-class BookLists(db.model):
+class BookLists(db.Model):
     __tablename__ = "book_lists"
 
     id = db.Column(UUID(as_uuid=True), primary_key=True)

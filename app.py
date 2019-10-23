@@ -18,4 +18,6 @@ class debug():
 if __name__ == "__main__":
     # db.create_all(app=app)
     # db.session.commit()
+    from Server.models import BannedUrls
+    print(BannedUrls.all()[0])
     app.run(host='0.0.0.0', debug=True)
