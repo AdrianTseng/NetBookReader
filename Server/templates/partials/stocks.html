@@ -40,12 +40,15 @@
             </ul>
         </div>
         <div class="body">
-            <div class="pure-menu menu-block">
+            <div v-if="!searching" class="pure-menu menu-block">
                 <transition-group name="menu" tag="ul" class="pure-menu-list">
                     <li class="pure-menu-item" v-for="menu in filtered" v-bind:key="menu.menu">
                         <a class="pure-menu-link" v-on:click="select(menu.id)">!{ menu.menu }</a>
                     </li>
                 </transition-group>
+            </div>
+            <div v-if="searching" class="" style="margin: 0 auto;">
+                <span class="fa fa-spinner fa-spin fa-5x"></span>
             </div>
         </div>
     </div>
@@ -67,6 +70,7 @@ var app = new Vue({
     data: {
         chapters: null,
         search: "",
+        searching: false
     },
     methods: {
         select: function (id) {
@@ -81,7 +85,6 @@ var app = new Vue({
     },
     computed: {
         filtered: function () {
-            console.log(this.search)
             if(this.search === ""){
                 return this.chapters
             }else{

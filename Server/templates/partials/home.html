@@ -77,10 +77,11 @@
                             </div>
                         </div>
                         <div class="search-result">
-                            <div v-if="!add_inventory.length">
+                            <div v-if="!on_searching" class="on-searching">
+                                <div v-if="!add_inventory.length">
                                 <h1>暂时还没有查找到相关小说!</h1>
                             </div>
-                            <div v-if="add_inventory.length">
+                                <div v-if="add_inventory.length">
                                 <div class="inventory-resource-list" v-for="book in add_inventory" v-bind:key="book.url">
                                     <div class="callout small">
                                         <div class="grid-x">
@@ -93,6 +94,10 @@
                                         <p class="book-chapter">!{ book.author }</p>
                                     </div>
                                 </div>
+                            </div>
+                            </div>
+                            <div v-if="on_searching" class="off-searching" style="margin: 0 auto">
+                                 <span class="fa fa-spinner fa-spin fa-5x"></span>
                             </div>
                         </div>
                     </div>
@@ -165,7 +170,8 @@ var app = new Vue({
         according: {
             books: null,
             pending: null
-        }
+        },
+        on_searching: false
     },
     computed: {
         filtered: function () {
@@ -238,12 +244,15 @@ var app = new Vue({
             return name === this.according.books;
         },
         search_for_add: function () {
+            this.on_searching = true;
             this.$http.post('/book/search', {book: this.add_s}, {emulateJSON: true}).then(
                 function (res) {
                     this.add_inventory = res.data.data;
+                    this.on_searching = false;
                 },
                 function (res) {
                     console.log(res);
+                    this.on_searching = false;
                 }
             );
         },
