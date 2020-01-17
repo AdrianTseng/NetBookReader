@@ -215,6 +215,7 @@ var app = new Vue({
         },
         collect: function (book_entity){
             let temp = this.add_inventory;
+            console.log(book_entity);
             this.add_inventory = this.add_inventory.filter(item => item !== book_entity);
             this.$http.post("/book/collect", book_entity, {emulateJSON: true}).then(
                 function (res) {

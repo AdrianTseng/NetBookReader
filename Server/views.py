@@ -1,6 +1,6 @@
 __author__ = 'LimeQM'
 
-from flask import render_template, redirect, flash, request, abort, jsonify, send_from_directory, send_file
+from flask import render_template, redirect, flash, request, abort, jsonify, send_from_directory, url_for
 from jinja2 import TemplateNotFound
 from . import app, login_manager, db
 from .models import User, Chapters, Reading, Inventory
@@ -51,8 +51,9 @@ def user():
             _user = User.find(form.username.data)
         if _user and _user.verify_password(form.password.data):
             login_user(user=_user, remember=True, duration=timedelta(days=LOGIN_DAYS))
-            if (request.base_url in request.referrer) and ("user" not in request.referrer):
-                return redirect(request.referrer)
+            next_url = request.args.get("next")
+            if (request.base_url in request.referrer) and next_url and (url_for('user') != next_url):
+                return redirect(next_url)
             else:
                 return redirect("/")
         flash("用户名或者密码错误")
@@ -204,7 +205,8 @@ def search_for_add_inventory():
     search_item = search_soup.select("body > div.recommend.mybook > div.hot_sale > a")
     search_result = [{"book": item.select_one(".title").text.strip(),
                       "author": item.select_one(".author").text.strip().split("：")[1],
-                      "url": item.attrs["href"]} for item in search_item]
+                      "url": item.attrs["href"] if "m.qu.la" not in item.attrs["href"]
+                      else item.attrs["href"].replace("m.qu.la", "m.jx.la")} for item in search_item]
 
     return jsonify(data=search_result)
 
