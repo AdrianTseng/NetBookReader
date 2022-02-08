@@ -35,7 +35,6 @@
         font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 
-    .v-leave { opacity: 1; }
     .v-leave-active { transition: opacity 2s }
     .v-leave-to { opacity: 0; }
     .v-enter { opacity: 0; }
@@ -48,7 +47,7 @@
             <div class="top-bar-left">
                 <ul class="menu">
                     <li><a href="/"><span class="fa fa-home fa-lg"></span></a></li>
-                    <li><a href="/menu/{{ book }}"><span class="fa fa-list-ol fa-lg"></span></a></li>
+                    <li><a v-bind:href="'/menu/' + book"><span class="fa fa-list-ol fa-lg"></span></a></li>
                     <transition name="fade">
                         <li v-if="next_ready">
                             <a v-on:click="next()"><span class="fa fa-chevron-right fa-lg"></span></a>
@@ -109,7 +108,8 @@ var app = new Vue({
         title: null,
         contents: [],
         next_chapter: null,
-        finished: false
+        finished: false,
+        book: "{{ book }}",
     },
     methods: {
         get_next_chapter: function () {

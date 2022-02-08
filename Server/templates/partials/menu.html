@@ -45,7 +45,7 @@
                     <li><a href="/"><span class="fa fa-home"></span></a></li>
                     <li v-if="!downloading"><a v-on:click="download()"><span class="fa fa-cloud-download"></span></a></li>
                     <li class="menu-text" v-if="downloading"><span class="fa fa-spinner fa-spin"></span></li>
-                    <li><input type="search" placeholder="检索《{{ book }}》的章节" v-model="search"></li>
+                    <li><input type="search" placeholder="《{{ book }}》 目录'" v-model="search"></li>
                 </ul>
             </div>
         </div>

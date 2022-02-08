@@ -30,10 +30,7 @@ def home():
         books = [each.get_progress() for each in user.books]
     books_name = [extract_book_name(each) for each in books]
     pending = [each for each in Chapters.get_books() if extract_book_name(each) not in books_name]
-    return render_template("/partials/home.html", dev="vue/dist/vue.js" if app.debug else "vue",
-                           user=user.username,
-                           books=books,
-                           pending=pending)
+    return render_template("/partials/home.html", user=user.username, books=books, pending=pending)
 
 
 @app.route('/<path:filename>')
@@ -179,10 +176,11 @@ def get_download_book():
 def search_for_add_inventory():
     import requests
     from bs4 import BeautifulSoup
+    from urllib.parse import quote
 
     book_name = request.form.get("book")
 
-    prefix_url = "https://m.jx.la"
+    search_url = "https://www.xbiquge.so/modules/article/search.php?searchkey=%s" % quote(str.encode(book_name, "GB2312"))
     headers = {
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'Accept-Language': 'en',
@@ -191,22 +189,18 @@ def search_for_add_inventory():
         'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 11_0 like Mac OS X) AppleWebKit/604.1.38 (KHTML, like Gecko) Version/11.0 Mobile/15A372 Safari/604.1',
         'Cache-Control': 'max-age=0',
         'Connection': 'keep-alive',
-        'Referer': prefix_url
+        'Referer': "https://www.xbiquge.so/book/51730/"
     }
 
-    prefix_html = requests.get(prefix_url, headers)
-    prefix_soup = BeautifulSoup(prefix_html.text, 'lxml')
-    prefix_item = prefix_soup.select(".searchForm > input[type=hidden]")
-    prefix_data = set(["%s=%s" % (each.get("name"), each.get("value")) for each in prefix_item])
-
-    search_url = "https://sou.xanbhx.com/search?q=%s&%s" % (book_name, "&".join(prefix_data))
-    search_html = requests.get(search_url, headers, verify=False)
-    search_soup = BeautifulSoup(search_html.text, 'lxml')
-    search_item = search_soup.select("body > div.recommend.mybook > div.hot_sale > a")
-    search_result = [{"book": item.select_one(".title").text.strip(),
-                      "author": item.select_one(".author").text.strip().split("：")[1],
-                      "url": item.attrs["href"] if "m.qu.la" not in item.attrs["href"]
-                      else item.attrs["href"].replace("m.qu.la", "m.jx.la")} for item in search_item]
+    result_html = requests.get(search_url, headers)
+    result_soup = BeautifulSoup(result_html.text, 'html.parser')
+    result_items = result_soup.select(".novelslistss > li")
+    search_result = [
+        {
+            "book": item.select_one("span:nth-child(2) > a:nth-child(1)").text.strip(),
+            "author": item.select_one("span:nth-child(4)").text.strip(),
+            "url": item.select_one("span:nth-child(2) > a:nth-child(1)").attrs["href"]
+        } for item in result_items]
 
     return jsonify(data=search_result)
 
